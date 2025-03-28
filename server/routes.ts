@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateRecipe } from "./openai";
-import { insertFoodSchema, insertExerciseSchema, insertExerciseLogSchema, insertFoodLogSchema, insertRecipeSchema, insertCartSchema } from "@shared/schema";
+import { insertFoodSchema, insertExerciseSchema, insertExerciseLogSchema, insertFoodLogSchema, insertRecipeSchema, insertCartSchema, insertWaterIntakeSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
@@ -51,7 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/user/register", async (req, res) => {
     try {
-      const userData = insertFoodSchema.parse(req.body);
+      const userData = insertUserSchema.parse(req.body);
       const existingUser = await storage.getUserByUsername(userData.username);
       
       if (existingUser) {
@@ -489,6 +489,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       await storage.clearCart(userId);
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Water Intake routes
+  app.post("/api/water-intake", async (req, res) => {
+    try {
+      const waterIntakeData = insertWaterIntakeSchema.parse(req.body);
+      const waterIntake = await storage.createWaterIntake(waterIntakeData);
+      res.status(201).json(waterIntake);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/water-intake/:userId", async (req, res) => {
+    const userId = parseInt(req.params.userId);
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    
+    const date = req.query.date ? new Date(req.query.date as string) : new Date();
+    
+    try {
+      const waterIntakeEntries = await storage.getWaterIntakeByUserAndDate(userId, date);
+      res.json(waterIntakeEntries);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/water-intake/:userId/total", async (req, res) => {
+    const userId = parseInt(req.params.userId);
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    
+    const date = req.query.date ? new Date(req.query.date as string) : new Date();
+    
+    try {
+      const totalWaterIntake = await storage.getTotalWaterIntakeByUserAndDate(userId, date);
+      res.json({ total: totalWaterIntake });
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.delete("/api/water-intake/:id", async (req, res) => {
+    const waterIntakeId = parseInt(req.params.id);
+    if (isNaN(waterIntakeId)) {
+      return res.status(400).json({ message: "Invalid water intake ID" });
+    }
+    
+    try {
+      const success = await storage.deleteWaterIntake(waterIntakeId);
+      if (!success) {
+        return res.status(404).json({ message: "Water intake entry not found" });
+      }
+      
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Server error" });

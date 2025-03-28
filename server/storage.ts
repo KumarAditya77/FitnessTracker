@@ -6,7 +6,8 @@ import {
   ExerciseLog, InsertExerciseLog, exerciseLogs,
   Recipe, InsertRecipe, recipes,
   Product, InsertProduct, products,
-  Cart, InsertCart, carts
+  Cart, InsertCart, carts,
+  WaterIntake, InsertWaterIntake, waterIntake
 } from "@shared/schema";
 
 export interface IStorage {
@@ -57,6 +58,12 @@ export interface IStorage {
   updateCartItem(id: number, quantity: number, usePoints: boolean): Promise<Cart | undefined>;
   removeFromCart(id: number): Promise<boolean>;
   clearCart(userId: number): Promise<boolean>;
+  
+  // Water intake methods
+  createWaterIntake(waterIntake: InsertWaterIntake): Promise<WaterIntake>;
+  getWaterIntakeByUserAndDate(userId: number, date: Date): Promise<WaterIntake[]>;
+  getTotalWaterIntakeByUserAndDate(userId: number, date: Date): Promise<number>;
+  deleteWaterIntake(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -68,6 +75,7 @@ export class MemStorage implements IStorage {
   private recipes: Map<number, Recipe>;
   private products: Map<number, Product>;
   private carts: Map<number, Cart>;
+  private waterIntakes: Map<number, WaterIntake>;
   
   private userIdCounter: number;
   private foodIdCounter: number;
@@ -77,6 +85,7 @@ export class MemStorage implements IStorage {
   private recipeIdCounter: number;
   private productIdCounter: number;
   private cartIdCounter: number;
+  private waterIntakeIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -87,6 +96,7 @@ export class MemStorage implements IStorage {
     this.recipes = new Map();
     this.products = new Map();
     this.carts = new Map();
+    this.waterIntakes = new Map();
     
     this.userIdCounter = 1;
     this.foodIdCounter = 1;
@@ -96,6 +106,7 @@ export class MemStorage implements IStorage {
     this.recipeIdCounter = 1;
     this.productIdCounter = 1;
     this.cartIdCounter = 1;
+    this.waterIntakeIdCounter = 1;
     
     // Initialize with sample data
     this.initSampleData();
@@ -431,6 +442,41 @@ export class MemStorage implements IStorage {
     
     cartIds.forEach(id => this.carts.delete(id));
     return true;
+  }
+
+  // Water Intake Methods
+  async createWaterIntake(waterIntakeData: InsertWaterIntake): Promise<WaterIntake> {
+    const id = this.waterIntakeIdCounter++;
+    const newWaterIntake: WaterIntake = { 
+      ...waterIntakeData, 
+      id, 
+      time: new Date() 
+    };
+    this.waterIntakes.set(id, newWaterIntake);
+    return newWaterIntake;
+  }
+
+  async getWaterIntakeByUserAndDate(userId: number, date: Date): Promise<WaterIntake[]> {
+    const targetDate = new Date(date);
+    const formattedDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+    
+    return Array.from(this.waterIntakes.values())
+      .filter(intake => {
+        const intakeDate = new Date(intake.date); 
+        return intake.userId === userId && 
+          intakeDate.getFullYear() === formattedDate.getFullYear() && 
+          intakeDate.getMonth() === formattedDate.getMonth() && 
+          intakeDate.getDate() === formattedDate.getDate();
+      });
+  }
+
+  async getTotalWaterIntakeByUserAndDate(userId: number, date: Date): Promise<number> {
+    const intakes = await this.getWaterIntakeByUserAndDate(userId, date);
+    return intakes.reduce((total, intake) => total + intake.amount, 0);
+  }
+
+  async deleteWaterIntake(id: number): Promise<boolean> {
+    return this.waterIntakes.delete(id);
   }
 }
 
