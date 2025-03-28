@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Food, FoodLog } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -231,7 +232,15 @@ export default function Nutrition() {
           <h1 className="text-2xl font-bold text-gray-900">Nutrition Tracker</h1>
           <p className="text-sm text-gray-500">Track and manage your daily food intake</p>
         </div>
-        <div className="mt-4 md:mt-0">
+        <div className="mt-4 md:mt-0 flex items-center">
+          <Link href="/nutrition/calculator">
+            <a className="mr-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+              <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              Nutrition Calculator
+            </a>
+          </Link>
           <span className="text-sm font-medium text-gray-500">Today's Date:</span>
           <span className="ml-2 text-sm font-medium text-gray-900">{format(date, "MMMM d, yyyy")}</span>
         </div>

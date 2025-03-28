@@ -9,6 +9,7 @@ import Nutrition from "@/pages/Nutrition";
 import Recipes from "@/pages/Recipes";
 import Exercises from "@/pages/Exercises";
 import Shop from "@/pages/Shop";
+import NutritionCalculator from "@/pages/NutritionCalculator";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/nutrition" component={Nutrition} />
+      <Route path="/nutrition/calculator" component={NutritionCalculator} />
       <Route path="/recipes" component={Recipes} />
       <Route path="/exercises" component={Exercises} />
       <Route path="/shop" component={Shop} />
