@@ -9,6 +9,7 @@ import RecommendedRecipes from "@/components/dashboard/RecommendedRecipes";
 import ExerciseTracker from "@/components/dashboard/ExerciseTracker";
 import ShopSection from "@/components/dashboard/ShopSection";
 import ContributeSection from "@/components/dashboard/ContributeSection";
+import WaterTracker from "@/components/dashboard/WaterTracker";
 
 export default function Dashboard() {
   // In a real app, this would come from a user context or API
@@ -47,8 +48,16 @@ export default function Dashboard() {
       
       <FoodTracker />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <RecommendedRecipes nutritionProgress={nutritionProgress} fitnessGoal={user.fitnessGoal} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+        <div className="md:col-span-2">
+          <RecommendedRecipes nutritionProgress={nutritionProgress} fitnessGoal={user.fitnessGoal} />
+        </div>
+        <div className="md:col-span-1">
+          <WaterTracker userId={1} targetIntake={2500} />
+        </div>
+      </div>
+      
+      <div className="mt-8">
         <ExerciseTracker />
       </div>
       

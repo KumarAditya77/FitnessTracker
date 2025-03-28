@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, real, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, real, json, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -131,6 +131,20 @@ export const insertCartSchema = createInsertSchema(carts).omit({
   id: true,
 });
 
+// Water intake schema
+export const waterIntake = pgTable("water_intake", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  amount: real("amount").notNull(), // in milliliters
+  date: date("date").notNull(),
+  time: timestamp("time").notNull().defaultNow(),
+});
+
+export const insertWaterIntakeSchema = createInsertSchema(waterIntake).omit({
+  id: true,
+  time: true,
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -155,3 +169,6 @@ export type InsertProduct = z.infer<typeof insertProductSchema>;
 
 export type Cart = typeof carts.$inferSelect;
 export type InsertCart = z.infer<typeof insertCartSchema>;
+
+export type WaterIntake = typeof waterIntake.$inferSelect;
+export type InsertWaterIntake = z.infer<typeof insertWaterIntakeSchema>;
